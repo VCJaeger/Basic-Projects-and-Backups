@@ -1,4 +1,3 @@
-function checkDateTEST() {
 // A lot of this will not make sense without seeing the spreadsheet I am working with but maybe this will help someone. Omitted sheet names for privacy
 // An explanation of what this is for is that I have a sheet that dynamically updates as someone submits a form online and each night I have to catalogue 
 // the entries to give a breakdown of them. I do not want to do this every night at 9PM thus this is a portion of a script that will do it for me upon a
@@ -9,6 +8,8 @@ function checkDateTEST() {
 // at 7PM the date for the entries changes to tomorrow's date thus requiring it to check for entries with that date that have a string designating they 
 // are relevant to today's count. As stated this is just a test and will need to be modified and inserted into a larger script.
 // this was my first "large" project so please be kind. I'm teaching myself everything.
+
+function checkDateTEST() {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var sourceSheet = spreadsheet.getSheetByName('Source sheet name');
   var destSheet = spreadsheet.getSheetByName('Destination Sheet name');
