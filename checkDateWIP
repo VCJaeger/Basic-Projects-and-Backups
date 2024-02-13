@@ -1,0 +1,71 @@
+function checkDateTEST() {
+// A lot of this will not make sense without seeing the spreadsheet I am working with but maybe this will help someone. Omitted sheet names for privacy
+// An explanation of what this is for is that I have a sheet that dynamically updates as someone submits a form online and each night I have to catalogue 
+// the entries to give a breakdown of them. I do not want to do this every night at 9PM thus this is a portion of a script that will do it for me upon a
+// time trigger. This is all code that I use through Google Apps Scripts as it is a Google Sheet. This script scans the entries starting from the bottom
+// (the most recent entry) and will copy all of the entries for today's date over to another sheet that has a table with formulas that display specified
+// data to which another script will copy that data into a third sheet for relevant parties to review though that portion has been omitted here as this 
+// was just to test checking the dates and moving the entries. Yes this process is convoluted but it is what it is. due to how I have the sheet set up, 
+// at 7PM the date for the entries changes to tomorrow's date thus requiring it to check for entries with that date that have a string designating they 
+// are relevant to today's count. As stated this is just a test and will need to be modified and inserted into a larger script.
+// this was my first "large" project so please be kind. I'm teaching myself everything.
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sourceSheet = spreadsheet.getSheetByName('Source sheet name');
+  var destSheet = spreadsheet.getSheetByName('Destination Sheet name');
+  var checkedDate = destSheet.getRange('AH2').getValue().toDateString(); // Today's date cell
+  var checkedDate2 = destSheet.getRange('AH3').getValue().toDateString(); // Tomorrow's date cell
+  var checkedDate3 = destSheet.getRange('AH4').getValue().toDateString(); // Random date test condition cell
+  var lastRowSource = sourceSheet.getLastRow();
+  var i = 1;
+  var firstSectionRange = destSheet.getRange('A1:H64');
+  var secondSectionRange = destSheet.getRange('A66:H100');
+  Logger.log("checkedDate value:" + checkedDate);
+  Logger.log("checkedDate2 value:" + checkedDate2);
+  //Clear the cells for new cycle
+  firstSectionRange.clearContent();
+  Logger.log("Cleared first range");
+  secondSectionRange.clearContent();
+  Logger.log("Cleared second range");
+
+  Logger.log("First entry row:" + sourceSheet.getRange(lastRowSource, 7).getValue());
+  Logger.log("Checking checkedDate");
+if (checkedDate == sourceSheet.getRange(lastRowSource, 7).getValue().toDateString()) {
+    Logger.log("True");
+} else {
+    Logger.log("False");
+}
+Logger.log("Checking checkedDate3");
+if (checkedDate3 == sourceSheet.getRange(lastRowSource, 7).getValue().toDateString()) { 
+    Logger.log("True");
+} else {
+    Logger.log("False");
+}
+  //below is the source sheet search loop 
+  while (lastRowSource > 0 && (sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate2 || sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate)) {
+    firstSectionRange = destSheet.getRange('A' + i + ':H' + i); 
+    Logger.log("current i value" + i);
+  
+    if (sourceSheet.getRange(lastRowSource, 5).getValue() === '-') { // Skips bad entry marked by - in dd box
+      Logger.log("Bad entry detected. Skipping row " + lastRowSource);
+      lastRowSource--;
+    } else if (sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate2
+               && sourceSheet.getRange(lastRowSource, 8).getValue().toLowerCase().indexOf("String") !== -1) { // this should include this trigger to pull 'String' entries
+      Logger.log("Valid entry detected on date " + checkedDate2.getValue() + ". Copying row " + lastRowSource + " to destination.");
+      // var entriesToCopy = sourceSheet.getRange(lastRowSource, 1, 1, 7).getValues()[0]; // Disable the line that gets entriesToCopy
+      // firstSectionRange.setValues([entriesToCopy]); // Disable the line that sets values to firstSectionRange
+      lastRowSource--;
+      i++
+    } else if (sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate
+               && sourceSheet.getRange(lastRowSource, 8).getValue().toLowerCase().indexOf("String") == -1) {
+      Logger.log("Entry with 'String' keyword detected on date " + checkedDate.getValue() + ". Skipping row " + lastRowSource);
+      lastRowSource--;
+    } else {
+      Logger.log("Valid entry detected on date " + sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() + ". Copying row " + lastRowSource + " to destination.");
+      // var entriesToCopy = sourceSheet.getRange(lastRowSource, 1, 1, 7).getValues()[0]; // Disable the line that gets entriesToCopy
+      //firstSectionRange.setValues([entriesToCopy]); // Disable the line that sets values to firstSectionRange
+      lastRowSource--;
+      i++
+    }
+  }
+  Logger.log("end of loop")
+}
