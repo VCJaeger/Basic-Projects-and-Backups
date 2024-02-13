@@ -1,0 +1,70 @@
+function checkDateTEST() {
+
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sourceSheet = spreadsheet.getSheetByName('Checked Sheet');
+  var destSheet = spreadsheet.getSheetByName('Dest Sheet');
+  var checkedDate = destSheet.getRange('AH2').getValue().toDateString();//Today's date
+  var checkedDate2 = destSheet.getRange('AH3').getValue().toDateString();//Tomorrow's date
+  var checkedDate3 = destSheet.getRange('AH4').getValue().toDateString();//Yesterday's date
+  var lastRowSource = sourceSheet.getLastRow();
+  var i = 1;
+  var firstRange = destSheet.getRange('A1:H64');
+  var secondRange = destSheet.getRange('A66:H100');
+  Logger.log("checkedDate value:" + checkedDate);
+  Logger.log("checkedDate2 value:" + checkedDate2);
+  //Clear the cells for new cycle
+  firstRange.clearContent();
+  Logger.log("Cleared first range");
+  secondRange.clearContent();
+  Logger.log("Cleared second range");
+
+  Logger.log("First entry row:" + sourceSheet.getRange(lastRowSource, 7).getValue());
+  Logger.log("Checking checkedDate");
+if (checkedDate == sourceSheet.getRange(lastRowSource, 7).getValue().toDateString()) {
+    Logger.log("True");
+} else {
+    Logger.log("False");
+}
+Logger.log("Checking checkedDate2");
+if (checkedDate2 == sourceSheet.getRange(lastRowSource, 7).getValue().toDateString()) { 
+    Logger.log("True");
+} else {
+    Logger.log("False");
+}
+  //below is the source sheet search loop 
+  while (lastRowSource > 0 && (sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate2 || sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate)) {
+    firstRange = destSheet.getRange('A' + i + ':G' + i); 
+    Logger.log("current i value" + i);
+  
+    if (sourceSheet.getRange(lastRowSource, 5).getValue() === '-') { // Skips bad entries marked by - in dd box
+      Logger.log("invalid entry. Skipping row " + lastRowSource);
+      lastRowSource--;
+    } else if (sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate2
+               && sourceSheet.getRange(lastRowSource, 8).getValue().toLowerCase().indexOf("String") != -1) { // this should include this trigger to pull 'String' leads
+      Logger.log("Valid tomorrow entry detected on date " + checkedDate2 + ". Copying row " + lastRowSource + " to destination.");
+      var entriesToCopy = sourceSheet.getRange(lastRowSource, 1, 1, 7).getValues()[0]; // Disable the line that gets entriesToCopy
+      firstRange.setValues([entriesToCopy]); // Disable the line that sets values to firstRange
+      lastRowSource--;
+      i++
+    }
+     else if (sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate2
+               && sourceSheet.getRange(lastRowSource, 8).getValue().toLowerCase().indexOf("String") == -1) { // this should skip blank tomorrow entries
+      Logger.log("Blank entry detected on date " + checkedDate2 + ". Skipping " + lastRowSource );
+      lastRowSource--;
+    }
+     else if (sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() == checkedDate
+               && sourceSheet.getRange(lastRowSource, 8).getValue().toLowerCase().indexOf("String") != -1) {
+      Logger.log("Today's date containing String.  Skipping row " + lastRowSource);
+      lastRowSource--;
+    } 
+    else {
+      Logger.log("Valid today lead detected on date " + sourceSheet.getRange(lastRowSource, 7).getValue().toDateString() + ". Copying row " + lastRowSource + " to destination.");
+      var entriesToCopy = sourceSheet.getRange(lastRowSource, 1, 1, 7).getValues()[0]; // Disable the line that gets entriesToCopy
+      firstRange.setValues([entriesToCopy]); // Disable the line that sets values to firstRange
+      lastRowSource--;
+      i++
+    }
+  }
+//could probably add in a break for if it runs into yesterday's date
+  Logger.log("end of loop");
+}
